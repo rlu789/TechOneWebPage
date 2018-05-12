@@ -86,10 +86,10 @@ namespace TechOneWebPage
             return null;
         }
 
-        private string Convert(char c, int pos, bool posOneAndTwo, bool removeAnd)
+        private string Convert(char c, int pos, bool posOneAndTwo, bool removeAnd, bool cents = false)
         {
             string retStr = null;
-            switch (pos)
+            switch (pos % 3)
             {
                 case -1:
                     if (posOneAndTwo)
@@ -98,59 +98,22 @@ namespace TechOneWebPage
                         retStr += GetWord(c, false, true);
                     }
                     else { retStr = GetWord(c); }
-                    retStr += " Dollars";
+                    if (pos == -1 )retStr += cents == false ? " Dollars" : " Cents";
+                    if (pos == -4) retStr += " Thousand";
+                    if (pos == -7) retStr += " Million";
+                    if (pos == -10) retStr += " Billion";
                     break;
                 case -2:
                     string word = GetWord(c, true);
-                    if (!removeAnd) retStr = "And ";
                     if (word != null)
                     {
+                        if (!removeAnd) retStr = "And ";
                         retStr += word;
                     }
                     break;
-                case -3:
+                case 0:
                     retStr = GetWord(c);
                     if (retStr != null ) retStr += " Hundred";
-                    break;
-                case -4:
-                    if (posOneAndTwo) { retStr = GetWord(c, false, true); }
-                    else { retStr = GetWord(c); }
-                    if (c != '0') retStr += " Thousand";
-                    break;
-                case -5:
-                    retStr = GetWord(c, true);
-                    break;
-                case -6:
-                    if (!removeAnd && c != '0') retStr = "And ";
-                    word = GetWord(c);
-                    if (word != null)
-                    {
-                        retStr += word;
-                        retStr += " Hundred";
-                    }
-                    break;
-                case -7:
-                    if (posOneAndTwo)
-                    {
-                        if (!removeAnd) retStr = "And ";
-                        retStr += GetWord(c, false, true);
-                    }
-                    else {
-                        retStr = GetWord(c);
-                    }
-                    retStr += " Million";
-                    break;
-                case -8:
-                    word = GetWord(c, true);
-                    if (word != null)
-                    {
-                        if (!removeAnd) retStr = "And ";
-                        retStr += GetWord(c, true);
-                    }
-                    break;
-                case -9:
-                    retStr = GetWord(c);
-                    if (retStr != null) retStr += " Hundred";
                     break;
             }
 
@@ -159,11 +122,14 @@ namespace TechOneWebPage
 
         private string NumToWords(string num)
         {
-            List<System.Threading.Tasks.Task> tasks = new List<System.Threading.Tasks.Task>(num.Length);
+            List<System.Threading.Tasks.Task> tasks = new List<System.Threading.Tasks.Task>();
             int decimalIndex = num.IndexOf('.');
             if (decimalIndex == -1) { decimalIndex = num.Length; } // if no decimal in num, set to be length of string
+            string cents = num.Substring(decimalIndex);
+            Console.WriteLine(cents);
+            Console.WriteLine((cents == ""));
 
-            for(int i = 0; i < decimalIndex; i++)
+            for (int i = 0; i < decimalIndex; i++)
             {
                 var index = i;
                 if (num[index] == '1' && (decimalIndex - index) % 3 == 2)
@@ -182,19 +148,45 @@ namespace TechOneWebPage
                     }));
                 }
             }
+
+            //if (cents != "") tasks.Add(System.Threading.Tasks.Task.Run(() =>{return " And"; }));
+            for (int i = 0; i < cents.Length; i++)
+            {
+                var index = i;
+                if (cents[index] == '1' && (cents.Length - index) % 3 == 2)
+                { // to deal with numbers eleven ... nineteen
+                    tasks.Add(System.Threading.Tasks.Task.Run(() =>
+                    {
+                        return Convert(cents[index + 1], index - cents.Length + 1, true, index == 0 ? true : false, true);
+                    }));
+                    i++;
+                }
+                else
+                {
+                    tasks.Add(System.Threading.Tasks.Task.Run(() =>
+                    {
+                        return Convert(cents[index], index - cents.Length, false, index == 0 ? true : false, true);
+                    }));
+                }
+            }
+
             System.Threading.Tasks.Task.WaitAll(tasks.ToArray());
 
-            var result = "";
+            string result = ""; string prevResult = null;
             foreach (System.Threading.Tasks.Task<string> item in tasks)
             {
-                Console.Write(item.Result + " ");
+                //if (item.Id != 1 && prevResult == null && item.Result != null && !item.Result.Contains("Dollars")) { result += "And "; }
+                if (item.Result != null) result += item.Result + " ";
+                //Console.Write(item.Result + " ");
+                prevResult = item.Result;
             }
-            return "";
+            Console.WriteLine(result);
+            return result;
         }
 
         public void Run()
         {
-            NumToWords("11202.");
+            NumToWords("3.13");
             Console.WriteLine("\nretu");
             ThreadPool.QueueUserWorkItem(o =>
             {
