@@ -1,0 +1,30 @@
+<html>
+<head>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.0/css/bootstrap.min.css" integrity="sha384-9gVQ4dYFwwWSjIDZnLEWnxCjeSWFphJiwGPXr1jddIhOegiu1FwO5qRGvFXOdJZ4" crossorigin="anonymous">
+</head>
+<body>
+    <input id="number" type="number" onchange="convert()"/>
+    <p id="result"></p>
+    <script>
+        function convert() {
+            $.ajax({
+                type: 'post',
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                data: {
+                    data: $("#number").val(),
+                },
+                url: 'http://localhost:8080/numToWords/',
+            })
+                .done(function (response) {
+                    $("#result").html(response);
+                });
+        }
+
+        $(document).ready(function () {
+            console.log("ready");
+        })
+    </script>
+</body>
+</html>
