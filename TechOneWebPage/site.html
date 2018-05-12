@@ -4,8 +4,21 @@
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.0/css/bootstrap.min.css" integrity="sha384-9gVQ4dYFwwWSjIDZnLEWnxCjeSWFphJiwGPXr1jddIhOegiu1FwO5qRGvFXOdJZ4" crossorigin="anonymous">
 </head>
 <body>
-    <input id="number" type="number" onchange="convert()"/>
-    <p id="result"></p>
+    <div>
+        <div class="jumbotron">
+            <h1>Number To Words Web App</h1>
+            <p>A simple Number to Words Web App made by <b>Richard Lu</b></p>
+        </div>
+    </div>
+    <div class="container">
+        <div class="row">
+            <div class="col">
+                <input class="form-control" placeholder="Enter Number To Convert" id="number" type="number" onchange="convert()" />
+            </div>
+            <div class="col" id="result">
+            </div>
+        </div>
+    </div>
     <script>
         function convert() {
             $.ajax({
@@ -18,7 +31,7 @@
                 url: 'http://localhost:8080/numToWords/',
             })
                 .always(function (response) {
-                    $("#result").html(response.responseText);
+                    if (response.responseText) { $("#result").html("<div class='alert alert-primary'>" + response.responseText + "</div>"); }
                 });
         }
 

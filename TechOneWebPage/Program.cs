@@ -86,7 +86,7 @@ namespace TechOneWebPage
             return null;
         }
 
-        private string Convert(char c, int pos, bool posOneAndTwo, bool removeAnd, bool cents = false)
+        private string Convert(char c, int pos, int length, bool posOneAndTwo, bool removeAnd, bool cents = false)
         {
             string retStr = null;
             if (c == '.') return retStr;
@@ -99,11 +99,13 @@ namespace TechOneWebPage
                         retStr += GetWord(c, false, true);
                     }
                     else { retStr = GetWord(c); }
-                    if (pos == -1 )retStr += cents == false ? " Dollars" : " Cents";
-                    if (pos == -4) retStr += " Thousand";
-                    if (pos == -7) retStr += " Million";
-                    if (pos == -10) retStr += " Billion";
-                    if (pos == -10) retStr += " Trillion";
+                    if (pos == -1) retStr += cents == false ? " Dollars" : " Cents";
+                    if (pos == -4 && (length <= 6 || retStr != null)) retStr += " Thousand";
+                    if (pos == -7 && (length <= 9 || retStr != null)) retStr += " Million";
+                    if (pos == -10 && (length <= 12 || retStr != null)) retStr += " Billion";
+                    if (pos == -13 && (length <= 15 || retStr != null)) retStr += " Trillion";
+                    if (pos == -13 && (length <= 18 || retStr != null)) retStr += " Quadrillion";
+                    if (pos == -13 && (length <= 21 || retStr != null)) retStr += " Sextillion";
                     break;
                 case -2:
                     string word = GetWord(c, true);
@@ -118,7 +120,6 @@ namespace TechOneWebPage
                     if (retStr != null ) retStr += " Hundred";
                     break;
             }
-
             return retStr;
         }
 
@@ -136,7 +137,7 @@ namespace TechOneWebPage
                 { // to deal with numbers ten ... nineteen specifically
                     tasks.Add(System.Threading.Tasks.Task.Run(() =>
                     {
-                        return Convert(num[index + 1], index - decimalIndex + 1, true, index == 0 ? true: false);
+                        return Convert(num[index + 1], index - decimalIndex + 1, num.Length, true, index == 0 ? true: false);
                     }));
                     i++;
                 }
@@ -144,12 +145,12 @@ namespace TechOneWebPage
                 {
                     tasks.Add(System.Threading.Tasks.Task.Run(() =>
                     {
-                        return Convert(num[index], index - decimalIndex, false, index == 0 ? true : false);
+                        return Convert(num[index], index - decimalIndex, num.Length, false, index == 0 ? true : false);
                     }));
                 }
             }
 
-            if (cents.Length > 1) tasks.Add(System.Threading.Tasks.Task.Run(() =>{return "And"; }));
+            if (cents.Length > 1) tasks.Add(System.Threading.Tasks.Task.Run(() =>{return "<b>AND</b>"; }));
             for (int i = 0; i < cents.Length; i++) // CENTS FORLOOP
             {
                 var index = i;
@@ -157,7 +158,7 @@ namespace TechOneWebPage
                 { // to deal with numbers eleven ... nineteen
                     tasks.Add(System.Threading.Tasks.Task.Run(() =>
                     {
-                        return Convert(cents[index + 1], index - cents.Length + 1, true, index == 0 ? true : false, true);
+                        return Convert(cents[index + 1], index - cents.Length + 1, num.Length, true, index == 0 ? true : false, true);
                     }));
                     i++;
                 }
@@ -165,7 +166,7 @@ namespace TechOneWebPage
                 {
                     tasks.Add(System.Threading.Tasks.Task.Run(() =>
                     {
-                        return Convert(cents[index], index - cents.Length, false, index == 0 ? true : false, true);
+                        return Convert(cents[index], index - cents.Length, num.Length, false, index == 0 ? true : false, true);
                     }));
                 }
             }
