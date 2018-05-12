@@ -183,8 +183,6 @@ namespace TechOneWebPage
 
         public void Run()
         {
-            NumToWords("3.9");
-            Console.WriteLine("\nretu");
             ThreadPool.QueueUserWorkItem(o =>
             {
                 Console.WriteLine("Webserver running...");
@@ -210,13 +208,17 @@ namespace TechOneWebPage
 
                                     string data = reader.ReadToEnd();
                                     string number = ""; bool isData = false;
-                                    foreach(char s in data) //NOTE DOESNT ACCOUNT FOR MULTIPLES
+                                    foreach (char s in data) //NOTE DOESNT ACCOUNT FOR MULTIPLES
                                     {
                                         if (s == '=' && !isData) { isData = true; }
                                         else if (isData) { number = number + s; }
                                     }
-                                    NumToWords(number);
-                                    rstr = number;
+                                    //System.Threading.Tasks.Task toWord = System.Threading.Tasks.Task.Run(() =>{ return NumToWords(number); });
+                                    //System.Threading.Tasks.Task.WaitAll(toWord);
+                                    //System.Threading.Tasks.Task<string> result = (System.Threading.Tasks.Task<string>)toWord;
+                                    //rstr = result.Result;
+                                    rstr = NumToWords(number);
+                                    Console.Write(rstr);
                                 }
                                 var buf = Encoding.UTF8.GetBytes(rstr);
                                 ctx.Response.ContentLength64 = buf.Length;

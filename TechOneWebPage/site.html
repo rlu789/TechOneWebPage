@@ -17,8 +17,8 @@
                 },
                 url: 'http://localhost:8080/numToWords/',
             })
-                .done(function (response) {
-                    $("#result").html(response);
+                .always(function (response) {
+                    $("#result").html(response.responseText);
                 });
         }
 
