@@ -14,6 +14,7 @@
         <div class="row">
             <div class="col">
                 <input class="form-control" placeholder="Enter Number To Convert" id="number" type="number" onchange="convert()" />
+                <div id="numTooLarge" style="padding-top:15px"></div>
             </div>
             <div class="col" id="result">
             </div>
@@ -21,23 +22,34 @@
     </div>
     <script>
         function convert() {
+            console.log(+$("#number").val());
+            var centsIndex = $("#number").val().toString().indexOf(".");
+            if ($("#number").val() > 999999999999999999999) {
+                $("#numTooLarge").html(" <div class='alert alert-danger' role='alert'>Number of Dollars Entered Is Too Large To Be Converted!</div >");
+                return;
+            }
+            else if (centsIndex !== -1 && $("#number").val().toString().substr(centsIndex + 1) > 999999999999999999999)  {
+                $("#numTooLarge").html(" <div class='alert alert-danger' role='alert'>Number of Cents Entered Is Too Large To Be Converted!</div >");
+                return;
+            }
+            else { $("#numTooLarge").html(""); }
+
             $.ajax({
                 type: 'post',
                 contentType: "application/json; charset=utf-8",
                 dataType: "json",
                 data: {
-                    data: $("#number").val(),
+                    data: +$("#number").val(),
                 },
                 url: 'http://localhost:8080/numToWords/',
             })
                 .always(function (response) {
-                    if (response.responseText) { $("#result").html("<div class='alert alert-primary'>" + response.responseText + "</div>"); }
+                    if (response.responseText) {
+                        $("#result").html("<div class='card'> <div class='card-body'> <h5 class='card-title'>Result</h5> <p class='card-text'>" + response.responseText + " </p> </div> </div> ");
+                    }
+                    else { $("#numTooLarge").html(" <div class='alert alert-danger' role='alert'>There Was An Error Attempting To Convert The Number</div >");}
                 });
         }
-
-        $(document).ready(function () {
-            console.log("ready");
-        })
     </script>
 </body>
 </html>
