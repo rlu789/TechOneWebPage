@@ -89,6 +89,7 @@ namespace TechOneWebPage
         private string Convert(char c, int pos, bool posOneAndTwo, bool removeAnd, bool cents = false)
         {
             string retStr = null;
+            if (c == '.') return retStr;
             switch (pos % 3)
             {
                 case -1:
@@ -102,6 +103,7 @@ namespace TechOneWebPage
                     if (pos == -4) retStr += " Thousand";
                     if (pos == -7) retStr += " Million";
                     if (pos == -10) retStr += " Billion";
+                    if (pos == -10) retStr += " Trillion";
                     break;
                 case -2:
                     string word = GetWord(c, true);
@@ -125,15 +127,13 @@ namespace TechOneWebPage
             List<System.Threading.Tasks.Task> tasks = new List<System.Threading.Tasks.Task>();
             int decimalIndex = num.IndexOf('.');
             if (decimalIndex == -1) { decimalIndex = num.Length; } // if no decimal in num, set to be length of string
-            string cents = num.Substring(decimalIndex);
-            Console.WriteLine(cents);
-            Console.WriteLine((cents == ""));
-
-            for (int i = 0; i < decimalIndex; i++)
+            string cents = num.Substring(decimalIndex); // if number has cents then store it
+            
+            for (int i = 0; i < decimalIndex; i++) // DOLLARS FORLOOP
             {
                 var index = i;
                 if (num[index] == '1' && (decimalIndex - index) % 3 == 2)
-                { // to deal with numbers eleven ... nineteen
+                { // to deal with numbers ten ... nineteen specifically
                     tasks.Add(System.Threading.Tasks.Task.Run(() =>
                     {
                         return Convert(num[index + 1], index - decimalIndex + 1, true, index == 0 ? true: false);
@@ -149,8 +149,8 @@ namespace TechOneWebPage
                 }
             }
 
-            //if (cents != "") tasks.Add(System.Threading.Tasks.Task.Run(() =>{return " And"; }));
-            for (int i = 0; i < cents.Length; i++)
+            if (cents.Length > 1) tasks.Add(System.Threading.Tasks.Task.Run(() =>{return "And"; }));
+            for (int i = 0; i < cents.Length; i++) // CENTS FORLOOP
             {
                 var index = i;
                 if (cents[index] == '1' && (cents.Length - index) % 3 == 2)
@@ -172,13 +172,10 @@ namespace TechOneWebPage
 
             System.Threading.Tasks.Task.WaitAll(tasks.ToArray());
 
-            string result = ""; string prevResult = null;
+            string result = "";
             foreach (System.Threading.Tasks.Task<string> item in tasks)
             {
-                //if (item.Id != 1 && prevResult == null && item.Result != null && !item.Result.Contains("Dollars")) { result += "And "; }
                 if (item.Result != null) result += item.Result + " ";
-                //Console.Write(item.Result + " ");
-                prevResult = item.Result;
             }
             Console.WriteLine(result);
             return result;
@@ -186,7 +183,7 @@ namespace TechOneWebPage
 
         public void Run()
         {
-            NumToWords("3.13");
+            NumToWords("3.9");
             Console.WriteLine("\nretu");
             ThreadPool.QueueUserWorkItem(o =>
             {
