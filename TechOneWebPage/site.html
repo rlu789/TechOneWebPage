@@ -22,7 +22,8 @@
     </div>
     <script>
         function convert() {
-            var number = $("#number").val(); 
+            var number = $("#number").val();
+            if (!number) { $("#numTooLarge").html(" <div class='alert alert-danger' role='alert'>Invalid Number!</div >"); return; }
             var centsIndex = number.toString().indexOf(".");
             if (number > 999999999999999999999) {
                 $("#numTooLarge").html(" <div class='alert alert-danger' role='alert'>Number of Dollars Entered Is Too Large To Be Converted!</div >");
@@ -44,10 +45,7 @@
                 url: 'http://localhost:8080/numToWords/',
             })
                 .always(function (response) {
-                    if (response.responseText === "e") {
-                        $("#numTooLarge").html(" <div class='alert alert-danger' role='alert'>Invalid Number!</div >");
-                    }
-                    else if (response.responseText) {
+                    if (response.responseText) {
                         $("#result").html("<div class='card'> <div class='card-body'> <h5 class='card-title'>Result</h5> <p class='card-text'>" + response.responseText + " </p> </div> </div> ");
                     }
                     else { $("#numTooLarge").html(" <div class='alert alert-danger' role='alert'>There Was An Error Attempting To Convert The Number</div >");}
