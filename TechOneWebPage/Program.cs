@@ -57,7 +57,7 @@ namespace TechOneWebPage
                     if (posOneAndTwo) return "Thirteen";
                     return "Three";
                 case '4':
-                    if (posTwo) return "Fourty";
+                    if (posTwo) return "Forty";
                     if (posOneAndTwo) return "Fourteen";
                     return "Four";
                 case '5':
@@ -123,15 +123,24 @@ namespace TechOneWebPage
 
         private string NumToWords(string num)
         {
-            List<System.Threading.Tasks.Task> tasks = new List<System.Threading.Tasks.Task>();
             int decimalIndex = num.IndexOf('.');
             if (decimalIndex == -1) { decimalIndex = num.Length; } // if no decimal in num, set to be length of string
             string dollars = num.Substring(0, decimalIndex);
             string cents = num.Substring(decimalIndex); // if number has cents then store it
-            
+            List<System.Threading.Tasks.Task> tasks = new List<System.Threading.Tasks.Task>();
+            if (dollars[0] == '-')
+            {
+                dollars = dollars.Substring(1);
+                tasks.Add(System.Threading.Tasks.Task.Run(() => { return "Negative"; }));
+            }
+
             for (int i = 0; i < dollars.Length; i++) // DOLLARS FORLOOP
             {
-                if (float.Parse(dollars) == 0) break;
+                if (float.Parse(dollars) == 0)
+                {
+                    tasks.Add(System.Threading.Tasks.Task.Run(() => { return "Zero Dollars"; }));
+                    break;
+                }
                 var index = i;
                 if (dollars[index] == '1' && (dollars.Length - index) % 3 == 2)
                 { // to deal with numbers ten ... nineteen specifically
@@ -150,7 +159,7 @@ namespace TechOneWebPage
                 }
             }
 
-            if (cents.Length > 1 && dollars.Length > 0 && float.Parse(dollars) >= 1) tasks.Add(System.Threading.Tasks.Task.Run(() =>{return "<b>AND</b>"; }));
+            if (cents.Length > 1 && dollars.Length > 0 && float.Parse(dollars) >= 0) tasks.Add(System.Threading.Tasks.Task.Run(() =>{return "<b>AND</b>"; }));
             bool leadingZerosCents = true; int start = 0;
             for (int i = 0; i < cents.Length; i++) // CENTS FORLOOP
             {
@@ -185,13 +194,12 @@ namespace TechOneWebPage
             {
                 if (item.Result != null) result += item.Result + " ";
             }
-            Console.WriteLine(result);
             return result;
         }
 
         public void Run()
         {
-            //NumToWords("0.099");
+            //NumToWords("-.45");
             ThreadPool.QueueUserWorkItem(o =>
             {
                 Console.WriteLine("Webserver running...");
@@ -222,12 +230,7 @@ namespace TechOneWebPage
                                         if (s == '=' && !isData) { isData = true; }
                                         else if (isData) { number = number + s; }
                                     }
-                                    //System.Threading.Tasks.Task toWord = System.Threading.Tasks.Task.Run(() =>{ return NumToWords(number); });
-                                    //System.Threading.Tasks.Task.WaitAll(toWord);
-                                    //System.Threading.Tasks.Task<string> result = (System.Threading.Tasks.Task<string>)toWord;
-                                    //rstr = result.Result;
                                     rstr = NumToWords(number);
-                                    Console.Write(rstr);
                                 }
                                 var buf = Encoding.UTF8.GetBytes(rstr);
                                 ctx.Response.ContentLength64 = buf.Length;
